@@ -236,11 +236,11 @@ if (GetMousepositionX() > 120 && GetMousePositionX() < 220 &&
 	*戻り値：なし
 	*************************************/
 
-	void StageDraw(void){
+	void StageDraw(void) {
 		DrawGraph(0, 0, StageImage, FALSE);
 
 		//アイテムの取得個数を描画
-		for (int i = 0; i< ITEM_MAX; i++)
+		for (int i = 0; i < ITEM_MAX; i++)
 		{
 			DrawRotaGraph(540, 245 + i * 30, 0.5f, 0, BlockImage[i + 1], TRUE, 0);
 			DrawFormatString(580, 235 + i * 30, 0xffffff, "%3d", Item[i]);
@@ -268,6 +268,107 @@ if (GetMousepositionX() > 120 && GetMousePositionX() < 220 &&
 			DrawGraph(Select[NEXT_CURSOR].x * BLOCKSIZE,
 				Select[NEXT_CURSOR].y * BLOCKSIZE, BlockImage[9], TRUE);
 		}
+
+		//ミッションを描画
+		SetFontSize(20);
+		DrawFormatString(590, 211, GetColor(255, 255, 255), "%3d", Stage_Mission);
+
+		//アイテムの取得個数を描画
+		for (int i = 0; i < ITEM_MAX; i++)
+		{
+			DrawRotaGraph(540, 245 + i * 30, 0.5f, 0, BlockImage[i + 1], TRUE, 0);
+			DrawFormatString(580, 235 + i * 30, GetColor(255, 255, 255), "%3d", Item[i]);
+		}
+	}
+
+	/***********************************
+	*ステージ制御機能：ブロック生成処理
+	*引　数：なし
+	*戻り値：なし
+	************************************/
+
+	void CreateBlock(void)
+	{
+		int Check = 0;
+		int i, j;
+
+		do
+		{
+			Check = 0;
+			for (i = 0; i < HEIGHT; i++)
+			{
+				for (j = 0; j < WIDTH; j++)
+				{
+					if (j == 0 || j == WIDHT - 1 || i == HEIGHT - 1 || I == 0)
+					{
+						Block[i][j].flg = FALSE;
+						Block[i][j].image = NULL;
+					}
+					else
+					{
+						Block[i][j].flg = TRUE;
+						Block[i][j].x = (j - 1) * BLOCKSIZE;
+						Block[i][j].y = (i - 1) * BLOCKSIZE;
+						Block[i][j].width = BLOCKSIZE;
+						Block[i][j].height = BLOCKSIZE;
+						Block[i][j].image = GetRand(7) + 1;//1～8の乱数
+
+					}
+				}
+			}
+
+			/*for(i=1;i<HEIGHT-1;i++)
+			{
+				for(j=1;j<WIDHT-1;j++)
+				  {
+					  if(Block[i][j].image==NULL)
+					  {
+					  Block[i][j].image=GetRand(7)+1;
+					  }
+			}
+
+		}*/
+		//ブロック連鎖チェック
+			for (i = 1; i < HEIGHT - 1; i++)
+			{
+				for (j = 1; j < WIDTH - 1; j++)
+				{
+					for (j = 1; j < WIDTH - 1; j++)
+					{
+						Check += combo_check(i, j);
+					}
+				}
+			}while (Check != 0);
+
+			for (i = 0; i < ITEM_MAX; i++)
+			{
+				Item[i] = 0;
+			}
+		}
+
+		/***************************************
+		*ステージ制御機能；ブロック選択処理
+		*引　数：なし
+		*戻り値：なし
+		****************************************/
+
+		void SelectBlock(void)
+		{
+			int TmpBlock;
+			int Result;
+
+			//カーソル座標の取得
+			Select[SELECT_CURSOR].x = GetMousePositionX() / BLOCKSIZE;
+			Select[SELECT_CURSOR].y = GetMousePositionY() / BLOCKSIZE;
+		
+			//選択ブロックの範囲を制御
+			if (Select[SELECT_CURSOR].x < 0)
+			{
+				Select[SELECT_CURSOR].x = 0;
+			}
+
+
+				
 
 
 
