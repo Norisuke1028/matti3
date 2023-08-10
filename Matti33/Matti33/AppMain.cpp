@@ -477,7 +477,7 @@ if (GetMousepositionX() > 120 && GetMousePositionX() < 220 &&
 				StopSoundMem(FadeOutSE);
 			}
 		}
-        /*************************************
+		/*************************************
 		*ステージ制御機能：ブロック移動処理
 		*引　数：なし
 		*戻り値：なし
@@ -488,17 +488,546 @@ if (GetMousepositionX() > 120 && GetMousePositionX() < 220 &&
 			//ブロック移動効果音
 			PlaySoundMem(MoveBlockSE, DX_PLAYTYPE_BACK);
 
-			//へ移動する処理
-			for(i=1;i<HEIGHT-1;i++)
+			//↓へ移動する処理
+			for (i = 1; i < HEIGHT - 1; i++)
 			{
+				for (j = 1; j < WIDTH - 1; j++)
+				{
+					if (Block[i][j].image == 0)
+					{
+						for (k = i; k > 0; k--)
+						{
+							Block[k][j].image = Block[k - 1][j].image;
+							Block[k - 1][j].image = 0;
+						}
+					}
+				}
+			}
 
 
+			//空のブロックを生成する処理
+			for (i = 1; i < HEIGHT - 1; i++)
+			{
+				for (j = 1; j < WIDHT - 1; j++)
+				{
+					if (Block[i][j].image == 0)
+					{
+						Block[i][j].image = GetRand(7) + 1;
+					}
+				}
+			}
 
+			//連鎖チェックへ移行する
+			Stage_State = 3;
+		}
 
-				
+		/***********************************
+		*ステージ制御機能：連鎖チェック処理
+		*引 数：なし
+		*戻り値：なし
+		*************************************/
 
+		void CheckBlock(void)
+		{
+			int Result = 0;
+			int i, j;
 
+			//ブロック連鎖チェック
+			for (i = 1; i < HEIGHT - 1; j++)
+			{
+				Result += combo_check(i, j);
+			}
+		}
 
+		//連鎖がなくなればブロック選択へ
+		//そうでなければブロック移動へ移行して連鎖チェックを継続する
+		if (Result == 0)
+		{
+			//クリアチェック処理へ移行する。
+			Stage_State = 4;
+		}
+		else
+		{
+			//連鎖が3つ以上ならブロックを消しブロック移動処理へ移行する
+			Stage_State = 1;
+		}
+	}
+
+	/******************************************************
+	*ステージ制御機能：クリア条件チェック処理
+	*引　数：なし
+	*戻り値：なし
+	*備　考：クリア条件フラグを0とし、各スクールの削除ブロックが
+	　　　　　　レベルよりも数が少なかったらチェック処理を中断してゲームを続行する。
+	********************************************************/
+
+	void CheckClear(void)
+	{
+		int i;
+		for (i = 0; i < ITEM_MAX; i++)
+		{
+			if (Item[i] >= Stage_MIssion)
+			{
+				ClearFlag = TRUE;
+				break;
+			}
+		}
+		if (ClearFlag != TRUE)
+		{
+			Stage_State = 0;
+		}
+
+	}
+
+	/************************************************
+	*ステージ制御機能：ステージステータス情報取得処理
+	*引　数：なし
+	*戻り値：ステージのステータス情報
+	************************************************/
+
+	int Get_StageState(void)
+	{
+		return Stage_State;
+	}
+
+	/***********************************************
+	*ステージ制御機能：ミッション情報取得処理
+	*引　数：なし
+	*戻り値：ミッションがクリアしているか
+	************************************************/
+	int Get_StageClearFlag(void)
+	{
+		return ClearFlag;
+	}
+
+	/***********************************************
+	*ステージ制御機能：ミッション情報取得処理
+	*引　数：なし
+	*戻り値：ミッションがクリアしているか
+	************************************************/
+	int Get_StageScore(void)
+	{
+		return Stage_Score;
+	}
+
+	/***********************************************
+	*ステージ制御機能：ミッション情報取得処理
+	*引　数：次ミッションに必要な数値
+	*戻り値：なし
+	************************************************/
+	void Set_StageMission(int mission)
+	{
+		Stage_Mission += mission;
+	}
+
+	/***********************************
+	*ステージ制御機能：連鎖チェック処理
+	*引数１：ブロックYマス
+	*引数２：ブロックXマス
+	*戻り値：連鎖有無（0:無し　1:有り）
+	***********************************/
+	int combo_check(int y, int x)
+	{
+		int ret = FALSE;
+
+		//縦方向のチェック
+		int CountH = 0;
+		int ColorH = 0;
+		save_block();
+		combo_check_h(y, x, &CountH, &ColorH);
+		if (CountH < 3)
+		{
+			restore_block();  //３個未満なら戻す
+		}
+
+		//縦方向のチェック
+		int CountW = 0;
+		int ColorW = 0;
+		save_block();
+		combo_check_w(y, x, &CountW, &ColorW);
+		if (CountW < 3)
+		{
+			restore_block();
+		}
+
+		//３つ以上で並んでいるか？
+		if ((CountH >= 3 || CountW >= 3))
+		{
+			if (CountH >= 3)
+			{
+				Item[ColorH - 1] += CountH;
+				Stage_Score += CountH * 10;
+			}
+			if (CountW >= 3)
+			{
+				Item[ColorW - 1] += CountW;
+				Stage_Score += CountW * 10;
+			}
+			ret = TRUE;
+		}
+
+		return ret;
+	}
+	/******************************************
+	*ステージ制御機能：連鎖チェック処理（縦方向）
+	*引　数：なし
+	*戻り値＊連鎖有無（0:無し 1:有り）
+	*******************************************/
+	void combo_check_h(int y, int x, int* cnt, int* col)
+	{
+		int Color = 0;
+		//対処のブロックが外枠の場合はreturnで処理を抜ける
+		if (Block[y][x].image == 0)
+		{
+			return;
+		}
+		*col = Block[y][x].image;
+		Color = Block[y][x].image;
+		Block[y][x].image = 0;
+		(*cnt)++;
+
+		if (Block[y + 1][x].image == Color)
+		{
+			combo_check_h(y + 1, x, cnt, col);
+		}
+		if (Block[y - 1][x].image == Color)
+		{
+			combo_check_h(y - 1, x, cnt, col);
+		}
+	}
+	/**********************************************
+	*ステージ制御機能：連鎖チェック処理（横方向）
+	*引　数：なし
+	*戻り値：連鎖有無（0:無し 1:有り）
+	**********************************************/
+	void combo_check_w(int y, int x, int* cnt, int* col)
+	{
+
+		int Color = 0;
+		//対象ブロックが外枠の場合returnで処理を抜ける
+		if (Block[y][x].image == 0)
+		{
+			return;
+		}
+
+		*col = Block[y][x].image;
+		Color = Block[y][x].image;   //色取得
+		Block[y][x].image = 0;
+		(*cnt)++;
+
+		if (Block[y][x + 1].image == Color)
+		{
+			combo_check_w(y, x + 1, cnt, col);
+		}
+		if (Block[y][x - 1].image == Color)
+		{
+			combo_check_w(y, x - 1, cnt, col);
+		}
+	}
+
+	/*******************************************
+	*ステージ制御機能：ブロック情報の保存処理
+	*引　数：なし
+	*戻り値：なし
+	*******************************************/
+
+	void save_block(void)
+	{
+		int i, j;
+
+		for (i = 0; i < HEIGHT; i++)
+		{
+			for (j = 0; j < WIDTH; j++)
+			{
+				Block[i][j].backup = Block[i][j].image;
+			}
+		}
+	}
+
+	/*******************************************
+	*ステージ制御機能：ブロック情報を戻す処理
+	*引　数：なし
+	*戻り値：なし
+	*******************************************/
+	void restore_block(void)
+	{
+		int i, j;
+
+		for (i = 0; i < HEIGHT; i++)
+		{
+			for (j = 0; j < WIDTH; j++)
+			{
+				Block[i][j].image = Block[i][j].backup;
+			}
+		}
+	}
+
+#include"SceneManager.h"
+#include"TitleScene.h"
+#include"GameMainScene.h"
+#include"GameClearScene.h"
+#include"GameOverScene.h"
+
+	/**********************
+	*マクロ定義
+	**********************/
+
+	/*********************
+	*型定義
+	*********************/
+
+	/*******************
+	*変数宣言
+	*******************/
+
+	GAME_MODE Game_Mode;       //ゲームモード情報（現在）
+	GAME_MODE Next_Mode;       // ゲームモード情報（次）
+
+	/*********************
+	*プロトタイプ宣言
+	*********************/
+
+	/****************************************
+	*シーン管理機能：初期化処理
+	* 引　数：ゲームモード情報
+	* 戻り値：なし
+	****************************************/
+	int SceneManager_Initialize(GAME_MODE mode)
+	{
+		int Read_Error;
+
+		//シーン読み込み処理
+		//タイトル画面
+		Read_Error == TitleScene_Initialize();
+		if (Read_Error == D_ERROR)
+		{
+			return D_ERROR;
+		}
+
+		//ゲームメイン画面
+		Read_Error = GameMainScene_Initialize();
+		if (Read_Error == D_ERROR)
+		{
+			return D_ERROR;
+		}
+
+		//ゲームクリア画面
+		Read_Error = GameClearScene_Initialize();
+		if (Read_Error == D_ERROR)
+		{
+			return D_ERROR;
+		}
+
+		//ゲームオーバー画面
+		Read_Error = GameOverScene_Initialize();
+		if (Read_Error == D_ERROR)
+		{
+			return D_ERROR;
+		}
+
+		Game_Mode = mode;
+		Next_Mode = Game_Mode;
+
+		return Read_Error;
+	}
+
+	/*************************************
+	*シーン管理機能：更新処理
+	*引　数：なし
+	*戻り値：なし
+	**************************************/
+	void SceneManager_Updete(void)
+	{
+		//前フレームとゲームモードが違っていたらシーンを切り替える
+		if (Game_Mode != Next_Mode)
+		{
+			SceneManager_Initialize(Next_Mode);
+		}
+
+		//各画面の更新処理
+		switch (Game_Mode)
+		{
+			case E_TITLE;
+				TitleScene_Update();
+				break;
+				case E_GAMEMAIN;
+					GameMainScene_Updete();
+					break;
+					case E_GAME_CLEAR;
+						GameClearScene_Update();
+						break;
+						case E_GAME_OVER;
+							GameOverScene_Update();
+							break;
+							default;
+							break;
+		}
+	}
+
+	/**********************************
+	*シーン管理機能：描画処理
+	*引　数：なし
+	*戻り値：なし
+	**********************************/
+	void SceneManager_Draw(void)
+	{
+		//各画面の描画処理
+		switch (Game_Mode)
+		{
+			case E_TITLE;
+				TitleScene_Draw();
+				break;
+				case E_GAMEMAIN;
+					GameMainScene_Draw();
+					break;
+					case E_GAME_CLEAR;
+						GameClearScene_Draw();
+						break;
+						default;
+						break;
+		}
+	}
+
+	/*********************************
+	*シーン管理機能：シーン切替処理
+	*引　数：変更するゲームモード
+	*戻り値：なし
+	********************************/
+	void Change_Scene(GAME_MODE mode)
+	{
+		Nest_Mode = mode;
+	}
+
+#include"DxLib.h"
+#include"InputControl.h"
+
+	/****************************
+	*変数宣言
+	****************************/
+	int old_button;
+	int now_button;
+	int mouse_pusition_x;
+	int mouse_position_y;
+
+	/***************************
+	*プロトタイプ宣言
+	***************************/
+
+	/***************************************
+	*入力制御機能：初期化処理
+	*引　数：なし
+	*戻り値：なし
+	***************************************/
+	void Input_Initialize(void)
+	{
+		old_button = NULL;
+		now_botton = NULL;
+		mouse_position_x = NULL;
+		mouse_position_y = NULL;
+	}
+
+	/**************************************
+	*入力制御機能：更新処理
+	*引　数：なし
+	*戻り値：なし
+	**************************************/
+	void Input_Update(void)
+	{
+		//マウス入力情報の取得
+		old_button = now_botton;
+		now_button = GetMouseInput();
+
+		//マウスカーソル座標の取得
+		GetMousePoint(&mouse_position_, &mouse_position_y);
+
+		]
+
+		/*******************************************
+		*入力制御機能：ESCキー入力チェック
+		*引　数：なし
+		*戻り値：TRUE（入力された）、FALSE（未入力）
+		********************************************/
+		int Input_Escape(void)
+		{
+			int ret = FALSE;
+
+			//ESCキーが押されたらループから抜ける
+			if (CheckHitKey(KEY_INPUT_ESCAPE))
+			{
+				ret = TRUE;
+
+			}
+			return ret;
+		}
+
+		/*******************************************
+		*入力制御機能：入力情報取得処理（離した瞬間）
+		*引　数：指定するマウスのボタン
+		*戻り値：TRUE（入力された）、FALSE（未入力）
+		*******************************************/
+		int GetOldKey(int key)
+		{
+			int ret = FALSE;
+
+			if ((key & old_button) != FALSE)
+			{
+				ret = TRUE;
+			}
+			return ret;
+		}
+
+		/******************************************
+		*入力制御機能：入力情報取得処理（押している）
+		*引　数：指定するマウスのボタン
+		*戻り値：TRUE（入力された）、FALSE(未入力）
+		*******************************************/
+		int GetNowKey(int key)
+		{
+			int ret = FALSE;
+
+			if ((key & now_button) != FALSE)
+			{
+				ret = TRUE;
+			}
+			return ret;
+		}
+
+		/*******************************************
+		*入力制御機能：入力情報取得処理（押した瞬間）
+		*引　数：指定するマウスのボタン
+		*戻り値：TRUE（入力された）、FALSE（未入力）
+		*******************************************/
+		int GetKeyFlg(int key)
+		{
+			int ret = FALSE;
+			int keyflg = now_button & ～old_button;
+
+			if ((key & keyflg) != FALSE)
+			{
+				ret = TRUE;
+			}
+			return ret;
+		}
+
+		/************************************
+		*入力制御機能マウス座標取得
+		*引　数：なし
+		*戻り値：マウスカーソルX座標情報
+		************************************/
+		int GetMousePositionX(void)
+		{
+			return mouse_position_x;
+		}
+
+		/************************************
+		*入力制御機能マウス座標取得
+		*引　数：なし
+		*戻り値：マウスカーソルY座標情報
+		************************************/
+		int GetMousePositionY(void)
+		{
+			return mouse_position_y;
+		}
 
 
 		

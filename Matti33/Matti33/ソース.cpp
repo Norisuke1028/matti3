@@ -36,7 +36,7 @@ void SelectBlock(void);
 void StageDraw(void);
 void FadeOutBlock(void);
 void MoveBlock(void);
-void CheakBlock(void);
+void CheckBlock(void);
 void CheckClear(void);
 
 int Get_StageState(void);
