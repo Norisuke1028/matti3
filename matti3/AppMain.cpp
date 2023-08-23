@@ -36,7 +36,7 @@ int TitleScene_Initialize(void)
 	//音源読み込み処理
 	TitleBGM = LoadSoundMem("sounds/title_bgm.mp3");
 
-	if (TitleImage == D_ERROR)
+	if(TitleImage == D_ERROR)
 	{
 		ret = D_ERROR;
 	}
@@ -68,12 +68,12 @@ void TitleScene_Update(void)
 	{
 		if (GetMousePositionX() > 120 && GetMousePositionX() < 290 &&
 			GetMousePositionY() > 260 && GetMousePositionY() < 315)
-			｛
+		{
 			Change_Scene(E_GAMEMAIN);
 
 		StopSoundMem(TitleBGM);
 	}
-	if (GetMousepositionX() > 120 && GetMousePositionX() < 220 &&
+	if (GetMousePositionX() > 120 && GetMousePositionX() < 220 &&
 		GetMousePositionY() > 345 && GetMousePositionY() < 400)
 	{
 		Change_Scene(E_END);
@@ -102,7 +102,7 @@ void TitleScene_Draw(void)
 ***************************/
 
 #define HEIGHT           (12)  //ブロック設置サイズ（高さ）
-#define WIDHT            (12)  //ブロック設置サイズ（幅）
+#define WIDTH            (12)  //ブロック設置サイズ（幅）
 #define BLOCKSIZE        (48)  //ブロックサイズ
 #define BLOCK_IMAGE_MAX  (10)  //ブロック画像数
 
@@ -146,7 +146,7 @@ T_CURSOR Select[3];
 int Item[ITEM_MAX];
 int ClickStatus;
 int Stage_State;
-int State_Mission;
+int Stage_Mission;
 int Stage_Score;
 int ClearFlag;
 
@@ -230,6 +230,10 @@ int StageInitialize(void)
 	return ret;
 }
 
+void CreateBlock(void)
+{
+}
+
 /*************************************
 *ステージ制御機能：ステージの描画
 *引　数：なし
@@ -299,7 +303,7 @@ void CreateBlock(void)
 		{
 			for (j = 0; j < WIDTH; j++)
 			{
-				if (j == 0 || j == WIDHT - 1 || i == HEIGHT - 1 || I == 0)
+				if (j == 0 || j == WIDTH - 1 || i == HEIGHT - 1 || I == 0)
 				{
 					Block[i][j].flg = FALSE;
 					Block[i][j].image = NULL;
@@ -338,7 +342,7 @@ void CreateBlock(void)
 					Check += combo_check(i, j);
 				}
 			}
-		}while (Check != 0);
+		}while(Check != 0);
 
 		for (i = 0; i < ITEM_MAX; i++)
 		{
@@ -352,7 +356,7 @@ void CreateBlock(void)
 	*戻り値：なし
 	****************************************/
 
-	void SelectBlock(void)
+    void SelectBlock(void)
 	{
 		int TmpBlock;
 		int Result;
@@ -394,10 +398,8 @@ void CreateBlock(void)
 					== 1 &&
 					(abs(Select[NEXT_CURSOR].y - Select[SELECT_CURSOR].y)
 						== 0)) ||
-					(abs(Select[NEXT_CURSOR].x - Select[SELECT_CURSOR].x)
-						== 0 &&
-						abs(Select[NEXT_CURSOR].y - Select[SELECT_CURSOR].y) ==
-						1)))
+					(abs(Select[NEXT_CURSOR].x - Select[SELECT_CURSOR].x)== 0 &&
+						abs(Select[NEXT_CURSOR].y - Select[SELECT_CURSOR].y) ==1)))
 			{
 				Select[TMP_CURSOR].x = Select[SELECT_CURSOR].x;
 				Select[TMP_CURSOR].y = Select[SELECT_CURSOR].y;
@@ -566,7 +568,7 @@ void CheckClear(void)
 	int i;
 	for (i = 0; i < ITEM_MAX; i++)
 	{
-		if (Item[i] >= Stage_MIssion)
+		if (Item[i] >= Stage_Mission)
 		{
 			ClearFlag = TRUE;
 			break;
@@ -831,6 +833,10 @@ int SceneManager_Initialize(GAME_MODE mode)
 	return Read_Error;
 }
 
+void SceneManager_Update(void)
+{
+}
+
 /*************************************
 *シーン管理機能：更新処理
 *引　数：なし
@@ -847,19 +853,19 @@ void SceneManager_Updete(void)
 	//各画面の更新処理
 	switch (Game_Mode)
 	{
-		case E_TITLE;
+	case E_TITLE:
 			TitleScene_Update();
 			break;
-			case E_GAMEMAIN;
-				GameMainScene_Updete();
+	case E_GAMEMAIN:
+				GameMainScene_Update();
 				break;
-				case E_GAME_CLEAR;
+	case E_GAME_CLEAR:
 					GameClearScene_Update();
 					break;
-					case E_GAME_OVER;
+	case E_GAME_OVER:
 						GameOverScene_Update();
 						break;
-						default;
+	default:
 						break;
 	}
 }
@@ -874,17 +880,17 @@ void SceneManager_Draw(void)
 	//各画面の描画処理
 	switch (Game_Mode)
 	{
-		case E_TITLE;
+	case E_TITLE:
 			TitleScene_Draw();
 			break;
-			case E_GAMEMAIN;
+	case E_GAMEMAIN:
 				GameMainScene_Draw();
 				break;
-				case E_GAME_CLEAR;
-					GameClearScene_Draw();
-					break;
-					default;
-					break;
+	case E_GAME_CLEAR:
+				GameClearScene_Draw();
+				break;
+	default:
+				break;
 	}
 }
 
@@ -895,7 +901,7 @@ void SceneManager_Draw(void)
 ********************************/
 void Change_Scene(GAME_MODE mode)
 {
-	Nest_Mode = mode;
+	Next_Mode = mode;
 }
 
 #include"DxLib.h"
@@ -906,7 +912,7 @@ void Change_Scene(GAME_MODE mode)
 ****************************/
 int old_button;
 int now_button;
-int mouse_pusition_x;
+int mouse_position_x;
 int mouse_position_y;
 
 /***************************
@@ -921,9 +927,13 @@ int mouse_position_y;
 void Input_Initialize(void)
 {
 	old_button = NULL;
-	now_botton = NULL;
+	now_button = NULL;
 	mouse_position_x = NULL;
 	mouse_position_y = NULL;
+}
+
+void Input_Update(void)
+{
 }
 
 /**************************************
@@ -934,13 +944,13 @@ void Input_Initialize(void)
 void Input_Update(void)
 {
 	//マウス入力情報の取得
-	old_button = now_botton;
+	old_button = now_button;
 	now_button = GetMouseInput();
 
 	//マウスカーソル座標の取得
-	GetMousePoint(&mouse_position_, &mouse_position_y);
+	GetMousePoint(&mouse_position_x, &mouse_position_y);
 
-		]
+}
 
 		/*******************************************
 		*入力制御機能：ESCキー入力チェック
@@ -1000,7 +1010,7 @@ void Input_Update(void)
 		int GetKeyFlg(int key)
 		{
 			int ret = FALSE;
-			int keyflg = now_button & ～old_button;
+			int keyflg = now_button & old_button;
 
 			if ((key & keyflg) != FALSE)
 			{
@@ -1072,6 +1082,10 @@ void Input_Update(void)
 			return ret;
 		}
 
+		void GameOverScene_Update(void)
+		{
+		}
+
 		/***************************************************
 		*ゲームオーバー画面：更新処理
 		*引　数：なし
@@ -1125,10 +1139,10 @@ void Input_Update(void)
 		*変数宣言
 		*******************************/
 		int GameScore;
-		int GmaeLevel;
+		int GameLevel;
 		int GameMission;
 		int GameTime;
-		int GmaeCount;    //初期化されないようにするためのカウント
+		int GameCount;    //初期化されないようにするためのカウント
 		int ReStartFlag;
 
 		int NumberImage[NUMBER_IMAGE_MAX];   //数字用画像
@@ -1174,8 +1188,8 @@ void Input_Update(void)
 			}
 			else
 			{
-				GameLevel++          //ゲームレベルの更新
-					Set_StageMission(3);     //ミッションを増やす
+				GameLevel++;          //ゲームレベルの更新
+				Set_StageMission(3);     //ミッションを増やす
 			}
 			GameTime = TIMELIMIT;     //制限時間の初期化
 
@@ -1191,19 +1205,19 @@ void Input_Update(void)
 		{
 			switch (Get_StageState())
 			{
-				case 0;
+			case 0:
 					SelectBlock();         //ブロックを選択する。
 					break;
-				case 2;
+			case 2:
 					MoveBlock();             //ブロックを移動させる。
 					break;
-				case 3;
+			case 3:
 					CheckBlock();        //ブロックの確認
 					break;
-				case 4;
+			case 4:
 						CheckClear();     //クリアチェック
 						break;
-				default;
+			default:
 						break;
 			}
 
@@ -1394,11 +1408,11 @@ void Input_Update(void)
 		void FreamControl_Update(void)
 		{
 			NowTime = GetNowCount();
-			Wait = TreamTime - (NowTime - LastTime);
+			Wait = FreamTime - (NowTime - LastTime);
 
 			if (Wait > 0)
 			{
-				WaitTime(Wait);
+				WaitTimer(Wait);
 			}
 			LastTime = GetNowCount();
 		}
@@ -1411,6 +1425,7 @@ void Input_Update(void)
 #include"FreamControl.h"
 #include"InputControl.h"
 #include"SceneManager.h"
+#include "ヘッダー.h"
 
 		/*******************************
 		*マクロ定義
