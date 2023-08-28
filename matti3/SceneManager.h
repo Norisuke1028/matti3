@@ -26,7 +26,7 @@ enum GAME_MODE
 *******************************/
 
 int SceneManager_Initialize(GAME_MODE mode);      //初期化処理
-void SceneManager_Update(void);             //更新処理
+void SceneManager_Update(void);            //更新処理
 void SceneManager_Draw(void);              //描画処理
 
 void Change_Scene(GAME_MODE mode);                 //シーン変更処理

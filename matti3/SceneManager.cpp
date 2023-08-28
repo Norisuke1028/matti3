@@ -67,16 +67,13 @@ int SceneManager_Initialize(GAME_MODE mode)
 	return Read_Error;
 }
 
-void SceneManager_Update(void)
-{
-}
 
 /*************************************
 *シーン管理機能：更新処理
 *引　数：なし
 *戻り値：なし
 **************************************/
-void SceneManager_Updete(void)
+void SceneManager_Update(void)
 {
 	//前フレームとゲームモードが違っていたらシーンを切り替える
 	if (Game_Mode != Next_Mode)

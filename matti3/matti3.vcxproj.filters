@@ -68,7 +68,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="TitleScene.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>リソース ファイル</Filter>
     </None>
   </ItemGroup>
 </Project>

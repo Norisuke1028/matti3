@@ -41,16 +41,13 @@ int GameOverScene_Initialize(void)
 	return ret;
 }
 
-void GameOverScene_Update(void)
-{
-}
 
 /***************************************************
 *ゲームオーバー画面：更新処理
 *引　数：なし
 *戻り値：なし
 ***************************************************/
-void GameOverScene_Updete(void)
+void GameOverScene_Update(void)
 {
 	//ゲームオーバー効果音再生チェック
 	if (CheckSoundMem(GameOverSE) == 0)

@@ -14,7 +14,7 @@
 
 #define ITEM_MAX         (8)  //アイテム最大数
 
-#define SELECT_CURSOR    (8)
+#define SELECT_CURSOR    (0)
 #define NEXT_CURSOR      (1)
 #define TMP_CURSOR       (2)
 
@@ -136,10 +136,6 @@ int StageInitialize(void)
 	return ret;
 }
 
-void CreateBlock(void)
-{
-}
-
 /*************************************
 *ステージ制御機能：ステージの描画
 *引　数：なし
@@ -198,6 +194,7 @@ void StageDraw(void) {
 ************************************/
 
 void CreateBlock(void)
+
 {
 	int Check = 0;
 	int i, j;
@@ -229,7 +226,7 @@ void CreateBlock(void)
 
 		/*for (i=1;i<HEIGHT-1;i++)
 		{
-			for (j=1;j<WIDHT-1;j++)
+			for (j=1;j<WIDTH-1;j++)
 			  {
 				  if (Block[i][j].image == NULL)
 				  {
