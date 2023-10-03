@@ -33,7 +33,7 @@ int GameClearScene_Initialize(void)
 	//‰æ‘œ‚Ì“Ç‚İ‚İ
 	GameClearImage = LoadGraph("images/gameclear.png");
 	//‰¹Œ¹‚Ì“Ç‚İ‚İ
-	GameClearSE = LoadSoundMem("sounds/gemeclear_se.mp3");
+	GameClearSE = LoadSoundMem("sounds/gameclear_se.mp3");
 
 	GameClearFlag = 0;
 
